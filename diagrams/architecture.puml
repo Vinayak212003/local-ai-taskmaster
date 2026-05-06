@@ -1,0 +1,164 @@
+@startuml SYSTEM_ARCHITECTURE
+!theme plain
+skinparam backgroundColor #0d1117
+skinparam defaultFontColor #c9d1d9
+skinparam ArrowColor #58a6ff
+skinparam componentBorderColor #30363d
+skinparam componentBackgroundColor #161b22
+
+title LocalAI TaskMaster — System Architecture
+
+package "Browser / Client" #1c2128 {
+  [React UI] as UI
+  [SSE Listener] as SSE
+}
+
+package "FastAPI Backend" #1c2128 {
+  [Task Router] as TR
+  [Agent Orchestrator] as AO
+  [Prompt Manager] as PM
+  [Stream Manager] as SM
+  [Task Service] as TS
+}
+
+package "Agent Layer" #1c2128 {
+  [Planner Agent] as PA
+  [Executor Agent] as EA
+  [Validator Agent] as VA
+}
+
+package "Storage Layer" #1c2128 {
+  database "SQLite\ntaskmaster.db" as DB
+  [Prompt Templates\n(YAML)] as YAML
+}
+
+package "AI Runtime" #1c2128 {
+  [Ollama Server\n:11434] as OLLAMA
+  [Mistral / LLaMA3\n(GGUF)] as MODEL
+}
+
+UI --> TR : POST /api/tasks
+UI --> SSE : GET /api/tasks/{id}/stream
+TR --> AO : dispatch(task)
+AO --> PA : plan(task)
+AO --> EA : execute(subtasks)
+AO --> VA : validate(results)
+PA --> OLLAMA : /api/generate
+EA --> OLLAMA : /api/generate
+VA --> OLLAMA : /api/generate
+OLLAMA --> MODEL : inference
+AO --> TS : save_result()
+TS --> DB : CRUD
+PM --> YAML : load templates
+SM --> SSE : stream chunks
+
+@enduml
+
+@startuml SEQUENCE_DIAGRAM
+!theme plain
+skinparam backgroundColor #0d1117
+skinparam defaultFontColor #c9d1d9
+skinparam sequenceArrowColor #58a6ff
+skinparam sequenceBoxBorderColor #30363d
+
+title Multi-Agent Task Execution Flow
+
+actor User
+participant "React UI" as UI
+participant "FastAPI\nBackend" as API
+participant "Orchestrator" as ORCH
+participant "Planner\nAgent" as PLAN
+participant "Executor\nAgent" as EXEC
+participant "Validator\nAgent" as VAL
+participant "Ollama\n:11434" as OLLAMA
+database "SQLite" as DB
+
+User -> UI : Submit task description
+UI -> API : POST /api/tasks\n{description, config}
+API -> DB : INSERT task (status=pending)
+API -> UI : {task_id, status}
+UI -> API : GET /api/tasks/{id}/stream (SSE)
+
+API -> ORCH : orchestrate(task_id)
+
+ORCH -> PLAN : plan(description)
+PLAN -> OLLAMA : generate(planner_prompt)
+OLLAMA --> PLAN : subtask list (streaming)
+PLAN --> ORCH : [subtask_1, subtask_2, ...]
+ORCH -> DB : UPDATE subtasks
+
+loop For each subtask
+  ORCH -> EXEC : execute(subtask)
+  EXEC -> OLLAMA : generate(executor_prompt)
+  OLLAMA --> EXEC : result (streaming)
+  EXEC --> ORCH : subtask_result
+  ORCH -> API : stream_event(subtask_result)
+  API -> UI : SSE chunk
+end
+
+ORCH -> VAL : validate(all_results)
+VAL -> OLLAMA : generate(validator_prompt)
+OLLAMA --> VAL : quality_score + feedback
+VAL --> ORCH : {score, feedback}
+
+ORCH -> DB : UPDATE task (status=complete, result)
+ORCH -> API : stream_event(DONE)
+API -> UI : SSE: [DONE]
+UI -> User : Display final result
+
+@enduml
+
+@startuml COMPONENT_DIAGRAM
+!theme plain
+skinparam backgroundColor #0d1117
+skinparam defaultFontColor #c9d1d9
+
+title Component Dependency Diagram
+
+package "backend/app" {
+  package "api" {
+    [tasks.py] as TASKS_ROUTE
+    [health.py] as HEALTH_ROUTE
+    [prompts.py] as PROMPTS_ROUTE
+  }
+
+  package "agents" {
+    [planner.py] as PLANNER
+    [executor.py] as EXECUTOR
+    [validator.py] as VALIDATOR
+    [orchestrator.py] as ORCHESTRATOR
+  }
+
+  package "services" {
+    [task_service.py] as TASK_SVC
+    [stream_service.py] as STREAM_SVC
+    [ollama_client.py] as OLLAMA_CLIENT
+    [prompt_service.py] as PROMPT_SVC
+  }
+
+  package "models" {
+    [task.py] as TASK_MODEL
+    [agent.py] as AGENT_MODEL
+  }
+
+  package "core" {
+    [database.py] as DB_CORE
+    [config.py] as CONFIG
+    [logger.py] as LOGGER
+  }
+}
+
+TASKS_ROUTE --> ORCHESTRATOR
+TASKS_ROUTE --> TASK_SVC
+TASKS_ROUTE --> STREAM_SVC
+ORCHESTRATOR --> PLANNER
+ORCHESTRATOR --> EXECUTOR
+ORCHESTRATOR --> VALIDATOR
+PLANNER --> OLLAMA_CLIENT
+EXECUTOR --> OLLAMA_CLIENT
+VALIDATOR --> OLLAMA_CLIENT
+ORCHESTRATOR --> PROMPT_SVC
+TASK_SVC --> DB_CORE
+PROMPT_SVC --> CONFIG
+
+@enduml

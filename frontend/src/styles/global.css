@@ -1,0 +1,69 @@
+/* ── Reset & Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-0: #0d1117;
+  --bg-1: #161b22;
+  --bg-2: #21262d;
+  --bg-3: #30363d;
+  --border: #30363d;
+  --border-muted: #21262d;
+
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+
+  --accent: #58a6ff;
+  --accent-hover: #79c0ff;
+  --accent-muted: #1f3a5f;
+
+  --success: #3fb950;
+  --success-muted: #1a3826;
+  --warning: #d29922;
+  --warning-muted: #3b2f0e;
+  --danger: #f85149;
+  --danger-muted: #3d1a1a;
+  --purple: #bc8cff;
+  --purple-muted: #2d1f4e;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  --font: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-sm: 0 1px 6px rgba(0,0,0,0.3);
+
+  --transition: 0.18s ease;
+}
+
+html, body {
+  background: var(--bg-0);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Markdown content ─────────────────────────────────────────────────────── */
+.md-content h1 { font-size: 1.3rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--text-primary); }
+.md-content h2 { font-size: 1.1rem; font-weight: 600; margin: 0.9rem 0 0.4rem; color: var(--text-primary); }
+.md-content h3 { font-size: 1rem; font-weight: 600; margin: 0.8rem 0 0.3rem; color: var(--accent); }
+.md-content p { margin-bottom: 0.6rem; color: var(--text-secondary); }
+.md-content ul, .md-content ol { padding-left: 1.4rem; margin-bottom: 0.6rem; color: var(--text-secondary); }
+.md-content li { margin-bottom: 0.2rem; }
+.md-content code { font-family: var(--font-mono); font-size: 0.85em; background: var(--bg-3); padding: 0.1em 0.4em; border-radius: 4px; color: var(--purple); }
+.md-content pre { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; overflow-x: auto; margin-bottom: 0.8rem; }
+.md-content pre code { background: transparent; padding: 0; color: var(--text-primary); }
+.md-content hr { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+.md-content strong { color: var(--text-primary); font-weight: 600; }
