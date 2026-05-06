@@ -470,3 +470,24 @@ MIT — see [LICENSE](LICENSE)
 ---
 
 *Built for AI engineers who want full control over their automation stack.*
+---
+
+## 📸 Screenshots
+
+### 🧠 Planner Agent — Breaking down the task
+![Planner Agent](screenshots/Screenshot01.png)
+
+### ⚙️ Executor Steps 2 & 3 — Running subtasks
+![Executor Steps](screenshots/Screenshot02.png)
+
+### ⚙️ Executor Steps 5 & 6 — Code generation
+![Executor Code](screenshots/Screenshot03.png)
+
+### ⚙️ Executor Step 8 + 🔍 Validator — Pipeline complete
+![Validator](screenshots/Screenshot04.png)
+
+### ✅ Final Result — Rendered markdown output
+![Final Result](screenshots/Screenshot05.png)
+
+### 📊 Quality Assessment — Score 85/100
+![Quality Score](screenshots/Screenshot06.png)
